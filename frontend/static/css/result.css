@@ -1,0 +1,234 @@
+/* General Styles */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px; /* Increased to align with .result-container */
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Navbar */
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navbar {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Card Styling */
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  background: #fff;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-header {
+  font-size: 1.3rem;
+  font-weight: bold;
+  border-bottom: 3px solid #ddd;
+  background-color: #007bff; /* Ensure consistent background */
+  color: #fff; /* Ensure text is readable */
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.info-list li {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Image Styling */
+.image-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.image-container div {
+  flex: 1 1 45%;
+  text-align: center;
+}
+
+.pet-image {
+  width: 100%;
+  max-width: 300px; /* Maintain max-width for larger screens */
+  height: auto; /* Remove fixed height for better responsiveness */
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.image-label {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 1.1rem;
+}
+
+/* Feedback Success Message */
+.feedback-success {
+  display: none;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #28a745;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: opacity 0.5s ease;
+}
+
+.feedback-success.show {
+  display: block;
+  opacity: 1;
+}
+
+/* Map Styling */
+.map-container {
+  height: 400px;
+  width: 100%;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+/* Clinic Section */
+.clinic-section {
+  margin-top: 2rem;
+}
+
+.clinic-section h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+.clinics-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.clinic-card {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  width: 300px; /* Fixed width for uniformity */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.clinic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.clinic-card i {
+  font-size: 1.8rem;
+  color: #28a745;
+  margin-bottom: 10px;
+}
+
+.clinic-details {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.clinic-contact {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.btn-view {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-view:hover {
+  background-color: #0056b3;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.action-buttons .btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border: none;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border: none;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .analysis-grid, .pet-info-grid, .clinics-grid {
+      grid-template-columns: 1fr;
+  }
+  
+  .image-container div, .clinic-card {
+      flex: 1 1 100%;
+      max-width: 100%;
+  }
+  
+  .pet-image {
+      max-width: 100%;
+      height: auto;
+  }
+}

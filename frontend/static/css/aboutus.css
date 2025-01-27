@@ -1,0 +1,121 @@
+/* About Page Specific Styles */
+.about-header {
+  background: linear-gradient(135deg, #2c3e50, #3498db);
+  padding: 4rem 2rem;
+  color: white;
+  margin-bottom: 3rem;
+  animation: fadeIn 1s ease;
+}
+.lead {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.about-header .display-4 {
+  font-weight: 700;
+  animation: slideInDown 0.8s ease;
+}
+/* Sticky Navbar */
+.sticky-navbar {
+  background-color: rgba(26, 26, 46, 0.95) !important;
+  padding: 15px 0;
+  backdrop-filter: blur(10px);
+}
+.content-section {
+  padding: 5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.content-section img {
+  border-radius: 15px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  transition: transform 0.5s ease;
+  animation: fadeInLeft 1s ease;
+}
+
+.content-section img:hover {
+  transform: scale(1.03);
+}
+
+.content-section .lead {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #2c3e50;
+  animation: fadeInRight 1s ease;
+}
+
+/* Team Section Enhancement */
+.team-member {
+  text-align: center;
+  margin: 2rem 0;
+  animation: fadeInUp 0.8s ease;
+}
+
+.team-member img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+  border: 5px solid #fff;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Social Media Icons */
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.social-icons a {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+  transform: translateY(-3px);
+  background: #3498db;
+  color: white;
+}
+
+/* Animations */
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .about-header {
+    padding: 3rem 1rem;
+  }
+  
+  .content-section {
+    padding: 3rem 0;
+  }
+}

@@ -1,0 +1,105 @@
+/* donation.css */
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+  }
+  
+ /* Navbar */
+/* Navbar */
+.navbar {
+  background-color: #1a1a2e;
+  padding: 15px 0;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+/* .nav-link:hover {
+  color: white !important;
+} */
+
+.nav-link.active {
+  color: white !important;
+}
+
+
+.navbar-nav .nav-link {
+  font-size: 0.95rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  color: white;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #f8a978;
+}
+  
+  .donation-container {
+    margin: 3rem auto;
+  }
+  
+  .donation-header {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .donation-header h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  
+  .donation-header p {
+    margin-top: 0.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .donation-form {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .donation-form label {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .donation-form .form-control {
+    border-radius: 5px;
+  }
+  
+  .donation-form .btn {
+    font-size: 1.1rem;
+    padding: 0.7rem 1.5rem;
+  }
+  
+  #invoice-section h5 {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  #invoice-link {
+    text-decoration: none;
+    color: white;
+  }
+  
+  footer {
+    background-color: #2c3e50;
+    color: #ffffff;
+    padding: 1rem 0;
+  }
+  
