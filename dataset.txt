@@ -1,0 +1,8 @@
+This is the dataset which was used to train the models for this project 
+cat:
+  1) https://universe.roboflow.com/research-on-health/coba-kucing-2
+  2)https://universe.roboflow.com/cat-ba6le/ringworm-wyuoh
+dog:
+  1)https://universe.roboflow.com/alex-9wuuw/enfermedades-tlugi/dataset/1
+  2)https://universe.roboflow.com/andy-sisalema-iv0da/enfermedades2-2jtc0
+  3)https://universe.roboflow.com/research-on-health/petwell-dog-gz0kv  
