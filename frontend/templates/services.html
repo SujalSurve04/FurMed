@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Our Services - FurMed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}" />
+ 
+    <style>
+
+  .navbar {
+    background: #1a1a2e !important;
+    padding: 0.8rem 1rem;
+    transition: all 0.3s ease-in-out;
+}
+.navbar {
+    background: rgba(45, 48, 6, 200);
+    backdrop-filter: blur(10px);
+    transition: var(--transition-fast);
+    padding: 1rem 0;
+}
+     body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    .container {
+        max-width: 1100px;
+    }
+
+    /* Services Section */
+    .services-container {
+        padding: 50px 0;
+    }
+
+    .section-title {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .section-title h2 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+
+    .section-title p {
+        color: #666;
+        font-size: 1.1rem;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Service Cards */
+    .service-card {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .service-card .image-wrapper {
+    width: 100%; /* Ensure it fills the card */
+    height: 250px; /* Adjust height for uniformity */
+    display: flex; /* Center image inside */
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    padding-top: 15px; /* Adds spacing above the image */
+}
+
+    .service-card .image-wrapper img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* Ensures the full image is visible without cropping */
+    }
+
+    .service-card .card-content {
+        padding: 30px;
+    }
+
+    .service-card h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+
+    .service-card p {
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.6;
+        padding: 20px;
+    }
+
+    /* Buttons */
+    .whatsapp-btn {
+        background-color: #25D366;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    }
+
+    .whatsapp-btn:hover {
+        background-color: #128C7E;
+        color: white;
+        text-decoration: none;
+    }
+
+    .donate-btn {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    }
+
+    .donate-btn:hover {
+        background-color: #218838;
+        color: white;
+        text-decoration: none;
+    }
+
+    
+    
+    .service-card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    text-align: center;  /* ✅ Centers the title */
+}
+
+    /* Footer */
+    footer {
+        background: #2c3e50;
+        color: white;
+        padding: 20px 0;
+        text-align: center;
+        margin-top: 50px;
+    }
+</style>
+
+ 
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}" />
+    
+
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('route_home') }}">
+                <i class="fas fa-paw mr-2"></i>FurMed
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('route_home') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('route_disease') }}">Disease Analysis</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ url_for('route_services') }}">Other Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('route_about') }}">About Us</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Services Section -->
+    <div class="services-container">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Services</h2>
+                <p>At FurMed, we are committed to providing unparalleled support for pet owners and their furry companions. 
+                Whether you're looking to connect with fellow pet lovers or contribute to a meaningful cause, 
+                our services are designed to create a positive impact on animal welfare.</p>
+            </div>
+
+            <div class="row">
+                <!-- Community Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="service-card">
+                        <div class="image-wrapper">
+                            <img src="{{ url_for('static', filename='images/community.png') }}" alt="Community">
+                        </div>
+                        <div class="card-content">
+                            <h3 class="pre">Join Our Community</h3>
+                            <p>Become a part of our warm and welcoming pet community! Connect with fellow pet lovers, 
+                            share advice, and engage in meaningful discussions about pet care and adoption. 
+                            Join our WhatsApp group to stay updated and make a difference.</p>
+                            <a href="https://chat.whatsapp.com/I84XxMtK6ku0LkuYZxCtI6" target="_blank" class="whatsapp-btn">
+                                <i class="fab fa-whatsapp mr-2"></i>Join WhatsApp Community
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donation Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="service-card">
+                        <div class="image-wrapper">
+                            <img src="{{ url_for('static', filename='images/donation.jpg') }}" alt="Donation">
+                        </div>
+                        <div class="card-content">
+                            <h3 class="pre">Support Our Cause</h3>
+                            <p>Your contributions help provide food, shelter, and medical care to animals in need. 
+                            Every donation, no matter the size, brings us one step closer to a better future for pets. 
+                            Click below to make a secure donation and change lives today.</p>
+                            <a href="{{ url_for('route_donation') }}" class="donate-btn">
+                                Donate Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+ <!-- Footer -->
+ <footer class="modern-footer mt-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="footer-section">
+            <h5 class="footer-heading accent-orange">About FurMed</h5>
+            <p class="footer-text">
+              Empowering pet owners with AI-driven health analysis and preventive care tips for their beloved companions.
+            </p>
+          </div>
+        </div>
+ 
+        <div class="col-md-4">
+          <div class="footer-section">
+            <h5 class="footer-heading accent-green">Contact Us</h5>
+            <p class="footer-text">
+              <i class="fas fa-envelope mr-2"></i>furmed.19@gmail.com<br>
+              <i class="fas fa-phone mr-2"></i>+91 9359389335
+            </p>
+            <p class="mb-0">&copy; 2025 FurMed. All Rights Reserved.</p>
+          </div>
+        </div>
+ 
+        <div class="col-md-4">
+          <div class="footer-section">
+            <h5 class="footer-heading accent-blue">Follow Us</h5>
+            <div class="social-links">
+             <a href="https://facebook.com/furmed" target="_blank" class="social-link facebook">
+               <i class="fab fa-facebook-f"></i>
+           </a>
+           <a href="https://twitter.com/furmed" target="_blank" class="social-link twitter">
+               <i class="fab fa-twitter"></i>
+           </a>
+           <a href="https://instagram.com/furmed" target="_blank" class="social-link instagram">
+               <i class="fab fa-instagram"></i>
+           </a>
+           <a href="https://linkedin.com/company/furmed" target="_blank" class="social-link linkedin">
+               <i class="fab fa-linkedin-in"></i>
+           </a>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </div>
+  </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
