@@ -107,7 +107,7 @@ PAYPAL_SECRET=your_paypal_secret
 PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
 
 # Mail Configuration
-MAIL_USERNAME=furmed.19@gmail.com
+MAIL_USERNAME=your_mail
 MAIL_PASSWORD=your_app_password
 
 # App Secret
@@ -174,7 +174,7 @@ The application will be available at: http://localhost:5000
 ## 📧 Contact and Model file link
 
 For questions or support:
-- Email: furmed.19@gmail.com
+- Email: survesujal04@gmail.com
 - Models:https://drive.google.com/drive/folders/11dRe0v_fgoGKq8NONxXMy7A7rNuaO6gl?usp=drive_link
 
 ## 📄 License
