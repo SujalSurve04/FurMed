@@ -1,4 +1,5 @@
 // result.js
+
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
     hideLoadingOverlay();
@@ -6,7 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let map;
 let markers = [];
+// Keep track of the user’s marker so we can remove it on relocate
+let userMarker = null;
 
+/**
+ * Initialize the map by getting the user's location (if available),
+ * otherwise fall back to a default location.
+ */
 function initMap() {
     if (!navigator.geolocation) {
         showLocationError();
@@ -14,29 +21,47 @@ function initMap() {
     }
 
     navigator.geolocation.getCurrentPosition(
-        position => {
+        (position) => {
             const { latitude, longitude } = position.coords;
             createMap([latitude, longitude]);
             generateVetClinics([latitude, longitude]);
         },
-        error => {
+        (error) => {
             console.error('Geolocation error:', error);
-            createMap([28.6139, 77.2090]); // Default location (e.g., New Delhi)
+            // Fallback to a default location, e.g., New Delhi
+            createMap([28.6139, 77.2090]);
+            generateVetClinics([28.6139, 77.2090]);
         }
     );
 }
 
+/**
+ * Create a Leaflet map at the given center coordinate.
+ * Also sets the tile layer, the user marker, and the locate button.
+ */
 function createMap(center) {
     map = L.map('vetMap').setView(center, 14);
-    
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
+    // Add the initial user marker
     addUserMarker(center);
+
+    // Add the custom "Relocate to Current Position" button
+    addLocateControl();
 }
 
+/**
+ * Place or update the user's location marker.
+ */
 function addUserMarker(location) {
+    // If there's an existing userMarker, remove it first
+    if (userMarker) {
+        userMarker.remove();
+    }
+
     const userIcon = L.divIcon({
         className: 'user-marker',
         html: '<i class="fas fa-map-marker-alt pulse"></i>',
@@ -44,12 +69,66 @@ function addUserMarker(location) {
         iconAnchor: [15, 30]
     });
 
-    L.marker(location, { icon: userIcon })
+    userMarker = L.marker(location, { icon: userIcon })
         .addTo(map)
         .bindPopup('Your Location')
         .openPopup();
 }
 
+/**
+ * Add a Leaflet control in the top-right corner that, when clicked,
+ * attempts to relocate the user’s position.
+ */
+function addLocateControl() {
+    const locateControl = L.control({ position: 'topright' });
+
+    locateControl.onAdd = function() {
+        // Create a simple button
+        const container = L.DomUtil.create(
+            'div', 
+            'leaflet-bar leaflet-control leaflet-control-custom'
+        );
+        container.innerHTML = '<i class="fas fa-location-arrow" style="padding: 8px;"></i>';
+        container.style.cursor = 'pointer';
+        container.title = 'Relocate to Current Position';
+
+        // When clicked, call relocateToCurrentPosition()
+        container.onclick = function() {
+            relocateToCurrentPosition();
+        };
+
+        return container;
+    };
+
+    locateControl.addTo(map);
+}
+
+/**
+ * Get the user’s location again and re-center the map, updating the user marker.
+ */
+function relocateToCurrentPosition() {
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const { latitude, longitude } = position.coords;
+            map.setView([latitude, longitude], 14);
+            addUserMarker([latitude, longitude]);
+        },
+        (error) => {
+            console.error('Relocation geolocation error:', error);
+            alert("Unable to retrieve your location again.");
+        }
+    );
+}
+
+/**
+ * For demo purposes, randomly generate veterinary clinics
+ * near the provided user location.
+ */
 function generateVetClinics(userLocation) {
     const vetClinics = [
         'PawCare Veterinary Hospital',
@@ -62,8 +141,11 @@ function generateVetClinics(userLocation) {
     ];
 
     clearExistingMarkers();
+
     const clinicList = document.getElementById('clinic-list');
-    clinicList.innerHTML = '';
+    if (clinicList) {
+        clinicList.innerHTML = '';
+    }
 
     for (let i = 0; i < 5; i++) {
         const clinic = {
@@ -80,8 +162,11 @@ function generateVetClinics(userLocation) {
     }
 }
 
+/**
+ * Generate a random location near a given center (approx 2km radius).
+ */
 function generateNearbyLocation(center) {
-    const radius = 0.02; // Approximately 2km
+    const radius = 0.02; // ~2km
     const angle = Math.random() * Math.PI * 2;
     const r = Math.sqrt(Math.random()) * radius;
     
@@ -91,6 +176,9 @@ function generateNearbyLocation(center) {
     ];
 }
 
+/**
+ * Place a marker on the map for a vet clinic.
+ */
 function addClinicMarker(clinic) {
     const clinicIcon = L.divIcon({
         className: 'clinic-marker',
@@ -109,15 +197,20 @@ function addClinicMarker(clinic) {
                 </div>
                 <p><i class="fas fa-phone"></i> ${clinic.phone}</p>
                 <p><i class="fas fa-clock"></i> ${clinic.timings}</p>
-                <p><i class="fas fa-route"></i> ${clinic.distance.toFixed(1)}km away</p>
+                <p><i class="fas fa-route"></i> ${clinic.distance.toFixed(1)} km away</p>
             </div>
         `);
 
     markers.push(marker);
 }
 
+/**
+ * Create a "card" in the clinic-list section to display clinic info.
+ */
 function addClinicToList(clinic) {
     const clinicList = document.getElementById('clinic-list');
+    if (!clinicList) return;
+
     const card = document.createElement('div');
     card.className = 'clinic-card';
     
@@ -129,7 +222,7 @@ function addClinicToList(clinic) {
                     <i class="fas fa-star"></i> ${clinic.rating}
                 </span>
                 <span class="distance">
-                    <i class="fas fa-route"></i> ${clinic.distance.toFixed(1)}km
+                    <i class="fas fa-route"></i> ${clinic.distance.toFixed(1)} km
                 </span>
             </div>
             <div class="clinic-contact">
@@ -145,6 +238,9 @@ function addClinicToList(clinic) {
     clinicList.appendChild(card);
 }
 
+/**
+ * Animate the map to fly to a specific clinic location.
+ */
 function focusClinic(location) {
     map.flyTo(location, 16, {
         duration: 1.5,
@@ -152,6 +248,9 @@ function focusClinic(location) {
     });
 }
 
+/**
+ * Calculate distance (in km) between two [lat, lng] points using Haversine formula.
+ */
 function calculateDistance(point1, point2) {
     const R = 6371; // Earth's radius in km
     const dLat = toRad(point2[0] - point1[0]);
@@ -160,24 +259,37 @@ function calculateDistance(point1, point2) {
     const lat2 = toRad(point2[0]);
 
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+              Math.sin(dLon/2) * Math.sin(dLon/2) *
+              Math.cos(lat1) * Math.cos(lat2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
 }
 
+/**
+ * Generate a random phone number (demo only).
+ */
 function generatePhoneNumber() {
     return `+91 ${Math.floor(Math.random() * 9000000000 + 1000000000)}`;
 }
 
+/**
+ * Generate sample clinic timings (demo only).
+ */
 function generateTimings() {
     return "9:00 AM - 8:00 PM";
 }
 
+/**
+ * Remove all existing markers from the map and clear from array.
+ */
 function clearExistingMarkers() {
-    markers.forEach(marker => marker.remove());
+    markers.forEach((marker) => marker.remove());
     markers = [];
 }
 
+/**
+ * Optionally hide a loading overlay if you have one in the DOM.
+ */
 function hideLoadingOverlay() {
     const loadingOverlay = document.querySelector('.loading-overlay');
     if (loadingOverlay) {
@@ -185,6 +297,9 @@ function hideLoadingOverlay() {
     }
 }
 
+/**
+ * Show an error if geolocation is not supported or user denied it.
+ */
 function showLocationError() {
     const mapContainer = document.getElementById('vetMap');
     mapContainer.innerHTML = `
@@ -195,58 +310,48 @@ function showLocationError() {
     `;
 }
 
-function toRad(degrees) {
-    return degrees * Math.PI / 180;
+/**
+ * Helper function: Convert degrees to radians.
+ */
+function toRad(deg) {
+    return deg * Math.PI / 180;
 }
 
-// Handle report submission
-// static/js/result.js
-
 /**
- * Function to handle reporting an incorrect prediction.
- * Prompts the user to enter the correct label and sends it to the server.
- * @param {string} predictionId - The ID of the prediction to report.
+ * Example function for handling feedback about incorrect prediction.
+ * (If you use a "Report" button that calls reportPrediction())
  */
 function reportPrediction(predictionId) {
-    // Prompt the user to enter the correct label
     const correctLabel = prompt("Please enter the correct disease label:");
 
-    // If the user cancels the prompt or enters nothing, do nothing
     if (correctLabel === null || correctLabel.trim() === "") {
         alert("Feedback canceled or no input provided.");
         return;
     }
 
-    // Optional: Validate the correct label against known disease classes
-    // You can implement additional validation here if needed
-
-    // Prepare the data to send
     const data = {
         prediction_id: predictionId,
         correct_label: correctLabel.trim().toLowerCase()
     };
 
-    // Send the POST request to the /feedback route
     fetch('/feedback', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
-    .then(data => {
+    .then((response) => response.json())
+    .then((result) => {
         const feedbackSuccess = document.getElementById('feedbackSuccess');
-        if (data.status === 'success') {
+        if (result.status === 'success') {
             feedbackSuccess.innerHTML = `
                 <div class="alert alert-success">
-                    ${data.message}
+                    ${result.message}
                 </div>
             `;
         } else {
             feedbackSuccess.innerHTML = `
                 <div class="alert alert-danger">
-                    ${data.message}
+                    ${result.message}
                 </div>
             `;
         }
@@ -261,4 +366,3 @@ function reportPrediction(predictionId) {
         `;
     });
 }
-
