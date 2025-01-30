@@ -50,10 +50,11 @@ FurMed is a sophisticated web application that leverages artificial intelligence
 
 ```
 FurMed/
-├── backend/
-│   ├── main_server.py          # Primary application server
-│   └── proxy_server.py         # AI inference server
-│
+├── main_server.py          # Primary application server
+├── proxy_server.py         # AI inference server
+├── logs/
+├── database/
+│    
 ├── models/
 │   ├── cat/                    # Cat disease models
 │   │   ├── *_keras.h5         # Keras models
@@ -80,7 +81,6 @@ FurMed/
 ### Prerequisites
 - Python 3.9+
 - MongoDB 5.0+
-- Node.js 14+ (for frontend development)
 - Git
 
 ### Step 1: Clone & Setup
