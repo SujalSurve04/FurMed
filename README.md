@@ -1,194 +1,186 @@
-# 🐾 FurMed: AI-Powered Pet & Stray Animal Health Diagnosis System
+# 🐾 FurMed: AI-Powered Pet Disease Detection System
 
-**FurMed** is an AI-driven web application designed to diagnose diseases in pets and stray animals using deep learning models. It leverages **YOLOv8 for object detection** and **custom-trained CNN models** for disease classification, offering a fast and scalable **AI-powered veterinary diagnosis system**.
+FurMed is a sophisticated web application that leverages artificial intelligence to diagnose diseases in both pets and stray animals. The system uses advanced deep learning models including YOLOv8 for object detection and custom CNN architectures for precise disease classification.
 
-## 🚀 Features
+## ✨ Key Features
 
-- **Pet Classification:** Identifies if an uploaded image is of a **Cat, Dog, or Other**
-- **Disease Detection:** Uses **YOLOv8 & Keras models** to classify diseases in cats and dogs
-- **Dual-Server Architecture:**
-  - **Main Server:** Handles user interactions, form submissions, and disease reports
-  - **Proxy Server:** Performs deep learning inference for disease prediction
-- **MongoDB Integration:** Stores **disease reports, user details, and donations**
-- **PayPal Payment Gateway:** Enables donations with **INR support & invoice generation**
-- **Email Feedback System:** Users can send feedback via email
-- **Mobile Responsive UI:** Optimized for **desktop, tablet, and mobile devices**
+### Core Functionality
+- 🔍 **Dual Animal Classification**: Accurately identifies cats and dogs in uploaded images
+- 🏥 **Disease Detection**: 
+  - Cats: Dermatitis, Flea Allergy, Ringworm, Scabies, Mange
+  - Dogs: Cataratas, Conjuntivitis, Infección Bacteriana, PyodermaNasal, Sarna, Dermatitis, Ringworm
+- 📋 **Comprehensive Reports**: Detailed disease information, first aid advice, and treatment recommendations
+
+### Technical Architecture
+- 🖥️ **Dual-Server System**:
+  - Main Server (Port 5000): Handles user interface, database operations, and payment processing
+  - Proxy Server (Port 5001): Dedicated to AI model inference and image processing
+- 💾 **Hybrid Storage**:
+  - Primary: MongoDB for scalable cloud storage
+  - Backup: Local SQLite database for reliability
+- 💰 **Payment Integration**: Secure PayPal gateway with INR/USD conversion
+- 📧 **Communication**: Email feedback system and automated invoice generation
+
+### User Experience
+- 📱 **Responsive Design**: Optimized for all device sizes
+- 🌐 **Real-time Processing**: Fast disease detection and report generation
+- 🔄 **Feedback System**: Users can provide correction feedback for continuous improvement
+
+## 🛠️ Technology Stack
+
+### Backend
+- **Framework**: Flask
+- **AI/ML**: 
+  - TensorFlow/Keras
+  - YOLOv8
+  - OpenCV
+- **Databases**: 
+  - MongoDB (primary)
+  - SQLite (backup)
+- **Payment**: PayPal API
+- **Email**: Flask-Mail
+
+### Frontend
+- **Framework**: HTML5, CSS3, JavaScript
+- **Styling**: Tailwind CSS
+- **Visualization**: Chart.js
+- **Maps**: Leaflet.js
 
 ## 📁 Project Structure
 
 ```
 FurMed/
-│
 ├── backend/
-│   ├── main_server.py     # Flask main server (User interactions, DB, PayPal)
-│   └── proxy_server.py    # Flask proxy server (ML model inference)
+│   ├── main_server.py          # Primary application server
+│   └── proxy_server.py         # AI inference server
 │
-├── models/                # Disease classification models
-│   ├── cat/              # Cat disease models
-│   │   ├── cat_disease_model_100percent.keras
-│   │   ├── cat_disease_model_with_weights.keras
-│   │   ├── catdisease_generalized_finetuned_yolov8.pt
-│   │   └── catdisease_memorized_finetuned_yolov8.pt
-│   │
-│   └── dog/              # Dog disease models
-│       ├── dog_disease_model_overfit.keras
-│       ├── dog_disease_model_with_weights.keras
-│       ├── dogdisease_generalized_finetuned_yolov8.pt
-│       └── dogdisease_memorized_finetuned_yolov8.pt
+├── models/
+│   ├── cat/                    # Cat disease models
+│   │   ├── *_keras.h5         # Keras models
+│   │   └── *_yolov8.pt        # YOLOv8 models
+│   └── dog/                    # Dog disease models
+│       ├── *_keras.h5         # Keras models
+│       └── *_yolov8.pt        # YOLOv8 models
 │
 ├── frontend/
-│   ├── static/           # Static files
-│   │   ├── css/         # Stylesheets
-│   │   ├── js/          # JavaScript files
-│   │   ├── images/      # Static images
-│   │   ├── uploads/     # Disease image uploads
-│   │   ├── f_upload/    # Full animal uploads
-│   │   └── invoices/    # Generated donation invoices
-│   │
-│   └── templates/        # HTML Templates
-│       ├── home.html
-│       ├── disease.html
-│       ├── result.html
-│       └── admin_dashboard.html
+│   ├── static/                 # Static assets
+│   │   ├── css/               # Stylesheets
+│   │   ├── js/                # JavaScript files
+│   │   ├── images/            # Static images
+│   │   ├── uploads/           # Disease images
+│   │   ├── f_upload/          # Full animal images
+│   │   └── invoices/          # Payment invoices
+│   └── templates/              # HTML templates
 │
-├── .env                  # Environment variables
-├── .gitignore           # Git ignore file
-├── requirements.txt      # Python dependencies
-└── README.md            # Project documentation
+└── database/                   # Local database storage
 ```
 
-## 🛠 Installation
+## ⚙️ Installation Guide
 
 ### Prerequisites
-
 - Python 3.9+
 - MongoDB 5.0+
+- Node.js 14+ (for frontend development)
 - Git
 
-### 1️⃣ Clone the Repository
-
-```sh
-git clone https://github.com/your-username/FurMed.git
+### Step 1: Clone & Setup
+```bash
+# Clone repository
+git clone https://github.com/SujalSurve04/FurMed.git
 cd FurMed
-```
 
-### 2️⃣ Create & Activate Virtual Environment
-
-```sh
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # OR
 venv\Scripts\activate     # Windows
-```
 
-### 3️⃣ Install Dependencies
-
-```sh
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 4️⃣ MongoDB Setup
-
-1. Create a MongoDB database named 'fur-med'
-2. Create collections: 'predictions' and 'donations'
-3. Set up indexes (see mongodbsetup.txt for detailed instructions)
-
-### 5️⃣ Configure Environment Variables
-
-Create a `.env` file in the root directory:
-
+### Step 2: Environment Configuration
+Create `.env` file in root directory:
 ```ini
-# MongoDB
+# MongoDB Configuration
 MONGO_URI=your_mongodb_uri
 
-# PayPal Configuration
+# PayPal Settings
 PAYPAL_CLIENT_ID=your_paypal_client_id
 PAYPAL_SECRET=your_paypal_secret
 PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
 
-# Mail Configuration
-MAIL_USERNAME=your_mail
+# Email Configuration
+MAIL_USERNAME=your_email
 MAIL_PASSWORD=your_app_password
 
-# App Secret
-SECRET_KEY=your-strong-secret-key
+# Application Security
+SECRET_KEY=your_secure_secret_key
 ```
 
-### 6️⃣ Create Required Directories
-
-```sh
-mkdir -p frontend/static/uploads
-mkdir -p frontend/static/f_upload
-mkdir -p frontend/static/invoices
+### Step 3: Directory Setup
+```bash
+# Create required directories
+mkdir -p frontend/static/{uploads,f_upload,invoices}
+mkdir -p database
 ```
+
+### Step 4: Download Models
+Download the pre-trained models from [Google Drive](https://drive.google.com/drive/folders/11dRe0v_fgoGKq8NONxXMy7A7rNuaO6gl?usp=drive_link) and place them in the `models/` directory.
 
 ## 🚀 Running the Application
 
-1. Start the Proxy Server (AI Models):
-```sh
-python proxy_server.py
+1. Start the AI Inference Server:
+```bash
+python proxy_server.py  # Runs on port 5001
 ```
 
-2. Start the Main Server (in a new terminal):
-```sh
-python main_server.py
+2. Launch the Main Application Server:
+```bash
+python main_server.py   # Runs on port 5000
 ```
 
-The application will be available at: http://localhost:5000
+Access the application at: http://localhost:5000
 
-## 🔥 API Endpoints
+## 🌐 API Endpoints
 
 | Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/disease` | POST | Upload and analyze pet images |
-| `/donation` | POST | Process donations |
-| `/send_feedback` | POST | Submit user feedback |
-| `/api/get_predictions` | GET | Fetch prediction history |
-| `/api/get_donations` | GET | Fetch donation history |
+|----------|---------|------------|
+| `/disease` | POST | Process pet disease detection |
+| `/donation` | POST | Handle donations |
+| `/feedback` | POST | Process user feedback |
+| `/api/get_predictions` | GET | Retrieve prediction history |
+| `/api/get_donations` | GET | Access donation records |
+| `/convert-inr-to-usd` | POST | Currency conversion |
 
-## 🤖 Supported Diseases
+## 🔒 Security Features
 
-### Dogs
-- Cataratas
-- Conjuntivitis
-- Infección Bacteriana
-- PyodermaNasal
-- Sarna
-- Dermatitis
-- Ringworm
+- Secure credential management via environment variables
+- File upload validation and sanitization
+- PayPal sandbox integration for safe testing
+- MongoDB authentication protection
+- Cross-Origin Resource Sharing (CORS) protection
+- SQL injection prevention
+- Rate limiting on sensitive endpoints
 
-### Cats
-- Dermatitis
-- Flea Allergy
-- Ringworm
-- Scabies
-- Mange
+## 🤝 Contributing
 
-## 🔒 Security
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-- All sensitive credentials are stored in environment variables
-- PayPal integration uses sandbox for testing
-- MongoDB access is protected with authentication
-- File uploads are validated and sanitized
+## 📞 Contact & Support
 
-## 📧 Contact and Model file link
-
-For questions or support:
-- Email: survesujal04@gmail.com
-- Models:https://drive.google.com/drive/folders/11dRe0v_fgoGKq8NONxXMy7A7rNuaO6gl?usp=drive_link
+- **Email**: survesujal04@gmail.com
+- **Issues**: Please use the GitHub issues tab
+- **Models**: Access pre-trained models [here](https://drive.google.com/drive/folders/11dRe0v_fgoGKq8NONxXMy7A7rNuaO6gl?usp=drive_link)
 
 ## 📄 License
 
-This project is licensed under the MIT License.
-
----
-🐾 **FurMed - Enhancing Animal Healthcare with AI** 🐱🐶
+This project is licensed under the MIT License. See `LICENSE` file for details.
 
 ---
 
-## 🛠 Installation
-
-### 1️⃣ **Clone the Repository**
-```sh
-git clone https://github.com/SujalSurve04/FurMed.git
-cd FurMed
+Made with ❤️ by the FurMed Team
