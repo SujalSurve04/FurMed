@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 
-
   <style>
     .navbar {
       background: #1a1a2e !important;
@@ -166,7 +165,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
         <a class="navbar-brand" href="{{ url_for('route_home') }}">
-            <i class="fas fa-paw mr-2"></i>FurMed
+            <i class="fas fa-paw"></i>FurMed
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -179,11 +178,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('route_disease') }}">Disease Analysis</a>
                 </li>
-                <li class="nav-item ">
+                <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('route_services') }}">Other Services</a>
                 </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('route_about') }}">About Us</a>
+                <li class="nav-item">
+                    <a class="nav-link active " href="{{ url_for('route_about') }}">About Us</a>
                 </li>
             </ul>
         </div>

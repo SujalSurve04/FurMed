@@ -1,67 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - FurMed</title>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
 <body>
-  <div class="login-wrap">
-    <h2>Admin Login</h2>
-    <div class="form">
-      <input type="text" placeholder="Username" name="un" id="username" />
-      <input type="password" placeholder="Password" name="pw" id="password" />
-      <button onclick="handleLogin()" class="login-btn">Login</button>
-      <button onclick="goBack()" class="back-btn">Go Back</button>
-      <p id="loginMessage" class="error-message"></p>
+    <div class="login-wrap">
+        <h2>Admin Login</h2>
+        <div class="form">
+            <div class="input-group">
+                <input type="text" placeholder="Username" id="username" autocomplete="off">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" placeholder="Password" id="password">
+                <i class="fas fa-lock"></i>
+            </div>
+            <button onclick="handleLogin()" class="btn login-btn">
+                <i class="fas fa-sign-in-alt mr-2"></i> Login
+            </button>
+            <button onclick="goBack()" class="btn back-btn">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Home
+            </button>
+            <p id="loginMessage" class="error-message"></p>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // Function to handle login
-    function handleLogin() {
-      var username = document.getElementById('username').value;
-      var password = document.getElementById('password').value;
+    <script>
+        // Function to handle login with enhanced feedback
+        async function handleLogin() {
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const loginBtn = document.querySelector('.login-btn');
+            const errorMsg = document.getElementById('loginMessage');
 
-      fetch("{{ url_for('route_login') }}", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username, password: password })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          window.location.href = data.redirect_url;
-        } else {
-          document.getElementById("loginMessage").innerText = data.message;
+            // Basic validation
+            if (!username.value || !password.value) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            // Add loading state
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch("{{ url_for('route_login') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: username.value,
+                        password: password.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Success animation before redirect
+                    loginBtn.style.background = 'var(--success-color)';
+                    loginBtn.innerHTML = '<i class="fas fa-check"></i> Success!';
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 1000);
+                } else {
+                    showError(data.message);
+                    loginBtn.classList.remove('loading');
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                showError('An error occurred. Please try again.');
+                loginBtn.classList.remove('loading');
+                loginBtn.disabled = false;
+            }
         }
-      })
-      .catch(error => console.error("Error:", error));
-    }
 
-    // Allow "Enter" key to trigger login
-    document.addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
-        handleLogin();
-      }
-    });
-
-    // Function to navigate back to home
-    function goBack() {
-      window.location.href = "{{ url_for('route_home') }}";
-    }
-
-    // Smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Enhanced error message display
+        function showError(message) {
+            const errorMsg = document.getElementById('loginMessage');
+            errorMsg.textContent = message;
+            errorMsg.classList.add('show');
+            
+            // Shake animation for error feedback
+            const loginWrap = document.querySelector('.login-wrap');
+            loginWrap.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
+            setTimeout(() => {
+                loginWrap.style.animation = '';
+            }, 500);
         }
-      });
-    });
-  </script>
+
+        // Function to navigate back
+        function goBack() {
+            const backBtn = document.querySelector('.back-btn');
+            backBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+            setTimeout(() => {
+                window.location.href = "{{ url_for('route_home') }}";
+            }, 500);
+        }
+
+        // Handle Enter key
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+
+        // Input focus effects
+        document.querySelectorAll('.input-group input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.querySelector('i').style.color = 'var(--accent-color)';
+            });
+
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.querySelector('i').style.color = '#95a5a6';
+                }
+            });
+        });
+
+        // Add shake animation for error states
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                10%, 90% { transform: translate3d(-1px, 0, 0); }
+                20%, 80% { transform: translate3d(2px, 0, 0); }
+                30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+                40%, 60% { transform: translate3d(4px, 0, 0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
