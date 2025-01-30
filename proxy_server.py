@@ -12,7 +12,19 @@ import os
 import sys
 import signal
 import multiprocessing
+import logging
+import sqlite3
 
+# Enhanced Logging Configuration
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/proxy_server.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 ###############################################################################
 # Flask App
 ###############################################################################
@@ -51,7 +63,7 @@ dog_classes = [
 # ✅ Similar Class Mapping (Handles Label Differences)
 similar_labels = {
     "fine": "Healthy skin",
-    "Healthy skin": "Healthy skin",
+    "Healthy skin": "Healthy skin", 
     "Ringworm": "ringworm",
     "ringworm": "ringworm"
 }
@@ -118,6 +130,7 @@ dog_disease_info = {
         "first_aid": "Isolate the infected dog to prevent spreading the fungus. Clean and disinfect bedding, brushes, and collars frequently. Wear gloves when handling the affected areas to avoid transmission. Keep the skin dry, as the fungus thrives in moist environments.",
         "treatment": "Antifungal shampoos, oral antifungal medications, and topical creams are commonly used. In severe cases, a vet may prescribe systemic antifungal treatments. Proper hygiene and environmental disinfection are essential for full recovery."
     }
+    
 }
 
 
@@ -152,6 +165,7 @@ cat_disease_info = {
         "first_aid": "Bathe the cat with medicated shampoos designed to eliminate mites and soothe irritated skin. Isolate the affected cat and disinfect bedding, food bowls, and grooming tools frequently. Avoid direct contact with other pets until the infection is treated. Provide a stress-free environment to boost the cat’s immune system and aid recovery.",
         "treatment": "Oral or topical anti-parasitic treatments prescribed by a vet are essential to eradicate mites. Medicated dips or injections may be required for severe cases. If secondary infections develop, antibiotics or anti-inflammatory drugs may be necessary. Long-term skin health maintenance includes regular flea prevention and maintaining a clean environment."
     }
+    
 }
 
 ###############################################################################
@@ -286,56 +300,102 @@ def classify_pet_type(filepath, threshold=0.6):
 # Analyze Disease
 ###############################################################################
 def analyze_disease(filepath, user_symptoms, models, classes, symptom_mapping):
-    """Unified disease prediction function"""
+    """
+    Analyze the disease image using multiple models and user-provided symptoms.
+    This function combines YOLO object detection, Keras classification, and symptom analysis
+    to provide a comprehensive disease prediction.
+    """
     print("Starting disease analysis...")
     
-    # YOLO predictions
-    yolo_detections = []
-    for model in models['yolo']:
-        results = model(filepath)
-        if results and results[0].boxes:
-            yolo_detections.extend(results[0].boxes.data.cpu().numpy())
-    print(f"YOLO detections: {len(yolo_detections)}")
-    
-    # Keras predictions
-    keras_input = preprocess_image_for_keras(filepath)
-    if keras_input is None:
-        print("Failed to preprocess image for Keras disease prediction")
-        return "Error", None
-    
+    # Initialize variables to store model predictions
+    yolo_predictions = []
     keras_predictions = []
-    for model in models['keras']:
-        preds = model.predict(keras_input)
-        keras_predictions.append(preds)
     
-    avg_keras_preds = np.mean(keras_predictions, axis=0)
-    keras_disease = classes[np.argmax(avg_keras_preds)]
-    keras_conf = np.max(avg_keras_preds)
-    print(f"Keras disease prediction: {keras_disease} with confidence {keras_conf}")
+    # Step 1: YOLO Object Detection
+    for i, yolo_model in enumerate(models['yolo']):
+        results = yolo_model(filepath)
+        if results and results[0].boxes:
+            boxes = results[0].boxes.data.cpu().numpy()
+            for box in boxes:
+                x1, y1, x2, y2, conf, class_id = box
+                disease = classes[int(class_id)]
+                yolo_predictions.append((disease, float(conf), f"YOLO_{i}"))
     
-    # Combine predictions
+    print(f"YOLO detections: {len(yolo_predictions)}")
+    
+    # Step 2: Keras Classification
+    keras_input = preprocess_image_for_keras(filepath)
+    if keras_input is not None:
+        for i, keras_model in enumerate(models['keras']):
+            preds = keras_model.predict(keras_input)
+            disease_index = np.argmax(preds)
+            confidence = preds[0][disease_index]
+            disease = classes[disease_index]
+            keras_predictions.append((disease, float(confidence), f"Keras_{i}"))
+    
+    print(f"Keras predictions: {len(keras_predictions)}")
+    
+    # Step 3: Combine predictions and calculate scores
     disease_scores = {}
+    for disease, conf, model_type in yolo_predictions + keras_predictions:
+        if disease not in disease_scores:
+            disease_scores[disease] = {
+                'score': 0,
+                'detections': [],
+                'max_conf': 0
+            }
+        
+        # Add detection with model type and confidence
+        disease_scores[disease]['detections'].append((model_type, conf))
+        
+        # Update max confidence
+        disease_scores[disease]['max_conf'] = max(disease_scores[disease]['max_conf'], conf)
+        
+        # Calculate score based on model type
+        if model_type.startswith('YOLO'):
+            disease_scores[disease]['score'] += conf * 0.6  # Higher weight for YOLO
+        else:  # Keras
+            disease_scores[disease]['score'] += conf * 0.4  # Lower weight for Keras
     
-    for det in yolo_detections:
-        x1, y1, x2, y2, conf, class_id = det
-        disease = classes[int(class_id)]
-        current_score = disease_scores.get(disease, 0)
-        disease_scores[disease] = max(current_score, float(conf) * 0.5)
-    
-    if keras_disease in disease_scores:
-        disease_scores[keras_disease] = max(disease_scores[disease], keras_conf * 0.3)
-    else:
-        disease_scores[keras_disease] = keras_conf * 0.3
-    
+    # Step 4: Incorporate user symptoms
     for disease in classes:
         symptom_score = sum(1 for s in user_symptoms if s in symptom_mapping.get(disease, [])) * 0.2
-        disease_scores[disease] = disease_scores.get(disease, 0) + symptom_score
+        if disease in disease_scores:
+            disease_scores[disease]['score'] += symptom_score
+        else:
+            disease_scores[disease] = {
+                'score': symptom_score,
+                'detections': [],
+                'max_conf': 0
+            }
     
-    print(f"Disease scores: {disease_scores}")
-    best_disease = max(disease_scores, key=disease_scores.get, default="No disease detected")
+    # Step 5: Determine the best disease prediction
+    if disease_scores:
+        best_disease = max(disease_scores, key=lambda x: disease_scores[x]['score'])
+        confidence = disease_scores[best_disease]['score']  # Use the score as confidence
+        detections = disease_scores[best_disease]['detections']
+    else:
+        best_disease = "No disease detected"
+        confidence = 0
+        detections = []
+    
+    # Step 6: Generate detailed report
+    report = {
+        'best_disease': best_disease,
+        'confidence': confidence,
+        'detections': detections,
+        'all_scores': {d: s['score'] for d, s in disease_scores.items()},
+        'symptom_match': {d: sum(1 for s in user_symptoms if s in symptom_mapping.get(d, [])) for d in classes}
+    }
+    
+    print(f"Disease prediction: {best_disease}")
+    print(f"Confidence: {confidence}")
+    print(f"All scores: {report['all_scores']}")
+    
+    # Step 7: Save detected image
     detected_image_path = save_detected_image(models['yolo'][0](filepath), filepath)
     
-    return best_disease, detected_image_path
+    return best_disease, detected_image_path, report
 
 ###############################################################################
 # Prediction for Cats
@@ -356,67 +416,74 @@ def save_detected_image(results, original_path):
     Saves YOLO-predicted image with bounding boxes from the first result set,
     using thicker lines, a background behind the label text, and a larger font.
     """
-    if not results or not results[0].boxes:
-        return None
-
     image = cv2.imread(original_path)
     if image is None:
+        print("Error: Could not read the original image.")
         return None
 
     # Resize for consistency
     image = cv2.resize(image, (600, 600))
 
-    # Get YOLO detection boxes
-    boxes = results[0].boxes.data.cpu().numpy()
+    if results and results[0].boxes:
+        # Get YOLO detection boxes
+        boxes = results[0].boxes.data.cpu().numpy()
 
-    for det in boxes:
-        x1, y1, x2, y2, conf, class_id = det
-        x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
+        for det in boxes:
+            x1, y1, x2, y2, conf, class_id = det
+            x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
 
-        # Bright green for high confidence; else red
-        if conf >= 0.7:
-            color = (0, 255, 0)
-        else:
-            color = (0, 0, 255)
+            # Bright green for high confidence; else red
+            color = (0, 255, 0) if conf >= 0.7 else (0, 0, 255)
 
-        # Thicker box outline
-        box_thickness = 3
-        cv2.rectangle(image, (x1, y1), (x2, y2), color, box_thickness)
+            # Thicker box outline
+            box_thickness = 3
+            cv2.rectangle(image, (x1, y1), (x2, y2), color, box_thickness)
 
-        # Larger/confident text label
-        label_text = f"{conf:.2f}"
-        font_scale = 1.0
-        text_thickness = 2
+            # Larger/confident text label
+            label_text = f"{conf:.2f}"
+            font_scale = 1.0
+            text_thickness = 2
 
-        # Calculate text size so we can draw a filled rect behind it
-        (text_width, text_height), baseline = cv2.getTextSize(
-            label_text,
-            cv2.FONT_HERSHEY_SIMPLEX,
-            font_scale,
-            text_thickness
-        )
+            # Calculate text size for the background rectangle
+            (text_width, text_height), baseline = cv2.getTextSize(
+                label_text,
+                cv2.FONT_HERSHEY_SIMPLEX,
+                font_scale,
+                text_thickness
+            )
 
-        # Make sure the text background (rectangle) is above the top box edge
-        text_y = max(y1, text_height + 10)
+            # Make sure the text background is above the top box edge
+            text_y = max(y1, text_height + 10)
 
-        # Draw filled rectangle behind text for better visibility
-        cv2.rectangle(
-            image,
-            (x1, text_y - text_height - 5),
-            (x1 + text_width, text_y),
-            color,
-            -1
-        )
+            # Draw filled rectangle behind text for better visibility
+            cv2.rectangle(
+                image,
+                (x1, text_y - text_height - 5),
+                (x1 + text_width, text_y),
+                color,
+                -1
+            )
 
-        # Put text in white on top of the colored rectangle
+            # Put text in white on top of the colored rectangle
+            cv2.putText(
+                image,
+                label_text,
+                (x1, text_y - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                font_scale,
+                (255, 255, 255),  # White text
+                text_thickness
+            )
+    else:
+        # If no detections, add text indicating this
         cv2.putText(
             image,
-            label_text,
-            (x1, text_y - 5),
+            "No detections",
+            (50, 50),
             cv2.FONT_HERSHEY_SIMPLEX,
-            font_scale,
-            (255, 255, 255),  # White text
-            text_thickness
+            1,
+            (0, 0, 255),  # Red text
+            2
         )
 
     # Save to predictions folder
@@ -426,97 +493,157 @@ def save_detected_image(results, original_path):
     cv2.imwrite(output_path, image)
 
     return f"/static/uploads/predictions/{predicted_filename}"
-
 ###############################################################################
 # Prediction Endpoint
 ###############################################################################
 @proxy_app.route('/predict_disease', methods=['POST'])
 def predict_disease_route():
     try:
-        print("Starting disease prediction route")
-        # Retrieve form data
+        logger.info("Received prediction request")
+        
+        # Enhanced logging for debugging
+        for key, value in request.form.items():
+            logger.info(f"Form data - {key}: {value}")
+        
+        # Validate required form data
+        required_fields = ['petType', 'ownerName', 'petName', 'petGender', 'symptoms']
+        for field in required_fields:
+            if field not in request.form:
+                logger.error(f"Missing required field: {field}")
+                return jsonify({
+                    "success": False,
+                    "error": f"Missing required field: {field}"
+                }), 400
+
+        # Validate file uploads
+        if 'full_animal_image' not in request.files or 'disease_image' not in request.files:
+            logger.error("Missing image files")
+            return jsonify({
+                "success": False,
+                "error": "Both full animal and disease images are required"
+            }), 400
+
+        # Extract data from request
         user_selected_type = request.form.get("petType", "Unknown").lower()
+        owner_name = request.form.get("ownerName", "Unknown")
+        pet_name = request.form.get("petName", "Unknown")
+        pet_gender = request.form.get("petGender", "Unknown")
         user_symptoms = request.form.getlist("symptoms")
-        print(f"User selected pet type: {user_selected_type}")
-        print(f"User symptoms: {user_symptoms}")
 
-        # Handle Full Animal Image
-        if 'full_animal_image' not in request.files:
-            return jsonify({"error": "No full animal image part"}), 400
-
+        # Save uploaded files
         full_animal_file = request.files['full_animal_image']
-        if full_animal_file.filename == '':
-            return jsonify({"error": "No selected full animal image"}), 400
-
-        if not allowed_file(full_animal_file.filename):
-            return jsonify({"error": "Full animal image type not allowed"}), 400
+        disease_file = request.files['disease_image']
 
         full_animal_filename = secure_filename(full_animal_file.filename)
         full_animal_filepath = os.path.join(proxy_app.config['F_UPLOAD_FOLDER'], full_animal_filename)
         full_animal_file.save(full_animal_filepath)
-        print(f"Full animal image saved at: {full_animal_filepath}")
-
-        # Handle Disease Image
-        if 'disease_image' not in request.files:
-            return jsonify({"error": "No disease image part"}), 400
-
-        disease_file = request.files['disease_image']
-        if disease_file.filename == '':
-            return jsonify({"error": "No selected disease image"}), 400
-
-        if not allowed_file(disease_file.filename):
-            return jsonify({"error": "Disease image type not allowed"}), 400
 
         disease_filename = secure_filename(disease_file.filename)
         disease_filepath = os.path.join(proxy_app.config['UPLOAD_FOLDER'], disease_filename)
         disease_file.save(disease_filepath)
-        print(f"Disease image saved at: {disease_filepath}")
 
-        # Step 1: Classify the Full Animal Image
-        predicted_type, confidence = classify_pet_type(full_animal_filepath)
-        print(f"Classification result: {predicted_type} with confidence {confidence}")
+        # Classify animal type
+        classified_type, classification_confidence = classify_pet_type(full_animal_filepath)
+        
+        if classified_type == "Other" or classification_confidence < 0.5:
+            return jsonify({
+                "success": False,
+                "error": "Could not detect a clear cat or dog in the image. Please upload a clearer photo."
+            }), 400
 
-        if predicted_type == "Other" or predicted_type == "Invalid Image" or predicted_type == "Error":
-            return jsonify({"error": "Invalid animal image. Please upload a valid cat or dog image."}), 400
+        # Predict disease
+        if user_selected_type not in ["cat", "dog"]:
+            return jsonify({"error": "Please select either 'cat' or 'dog'"}), 400
 
-        # Step 2: Predict Disease Using Disease Image
-        if predicted_type.lower() == "cat":
-            final_disease, detected_image_url = predict_cat_disease(disease_filepath, user_symptoms)
-        elif predicted_type.lower() == "dog":
-            final_disease, detected_image_url = predict_dog_disease(disease_filepath, user_symptoms)
-        else:
-            # Just in case, though classification should cover it
-            return jsonify({"error": "Unsupported animal type."}), 400
-
-        print(f"Disease prediction: {final_disease}")
-        print(f"Detected image URL: {detected_image_url}")
-
-        if final_disease == "No disease detected" or final_disease == "Error":
-            return jsonify({"error": "Invalid disease image or unable to detect disease."}), 400
-
-        if not detected_image_url:
-            detected_image_url = "/static/images/no_prediction.png"
-
-        # Fetch disease info (this should be available or fetched from a database)
-        disease_info = cat_disease_info.get(final_disease, {}) if predicted_type.lower() == "cat" else dog_disease_info.get(final_disease, {})
-
-        # Prepare the response
-        response_data = {
-            "status": "success",
-            "pet_type": predicted_type,
+        # Get disease prediction
+        predict_func = predict_cat_disease if user_selected_type == "cat" else predict_dog_disease
+        final_disease, detected_image_url, report = predict_func(disease_filepath, user_symptoms)
+        
+        # Prepare prediction data
+        prediction_data = {
+            "success": True,
+            "pet_type": user_selected_type,
+            "pet_name": pet_name,
+            "owner_name": owner_name,
+            "pet_gender": pet_gender,
             "disease": final_disease,
-            "detected_image_url": detected_image_url,
-            "details": disease_info.get("details", "No information available."),
-            "first_aid": disease_info.get("first_aid", "No first aid available."),
-            "treatment": disease_info.get("treatment", "No treatment info available.")
+            "detected_image_path": detected_image_url or "/static/images/no_prediction.png",
+            "confidence": report['confidence'],
+            "symptoms": user_symptoms,
+            "full_animal_image_path": full_animal_filepath,
+            "disease_image_path": disease_filepath
         }
+
+        # Try saving to local database
+        local_prediction_id = save_prediction_to_local_db(prediction_data)
+
+        # Prepare final response
+        response_data = {
+            "success": True,
+            "pet_type": user_selected_type,
+            "disease": final_disease,
+            "detected_image_url": detected_image_url or "/static/images/no_prediction.png",
+            "local_prediction_id": local_prediction_id,
+            "confidence": report['confidence'],
+            "symptom_match": report['symptom_match'].get(final_disease, 0),
+            "all_scores": report['all_scores'],
+            "metadata": {
+                "pet_name": pet_name,
+                "owner_name": owner_name,
+                "pet_gender": pet_gender
+            }
+        }
+
+        # Add confidence warning if needed
+        if report['confidence'] < 0.6:
+            response_data["warning"] = "Low confidence prediction. Please consult with a veterinarian."
 
         return jsonify(response_data), 200
 
     except Exception as e:
-        print(f"Error in disease prediction route: {str(e)}")
-        return jsonify({"error": "Invalid image or processing error."}), 500
+        logger.error(f"Unexpected error in prediction route: {e}", exc_info=True)
+        return jsonify({
+            "success": False,
+            "error": f"Unexpected server error: {str(e)}"
+        }), 500
+    
+DATABASE_DIR = 'database'
+os.makedirs(DATABASE_DIR, exist_ok=True)
 
+
+
+
+
+def save_prediction_to_local_db(prediction_data):
+    """Save prediction results to local SQLite database."""
+    try:
+        with sqlite3.connect(os.path.join(DATABASE_DIR, 'local_predictions.db')) as conn:
+            cursor = conn.cursor()
+            
+            # Prepare data for insertion
+            insert_data = (
+                prediction_data.get('pet_type', 'Unknown'),
+                prediction_data.get('disease', 'Unknown'),
+                prediction_data.get('confidence', 0.0),
+                json.dumps(prediction_data.get('symptoms', [])),
+                prediction_data.get('full_animal_image_path', ''),
+                prediction_data.get('disease_image_path', ''),
+                prediction_data.get('detected_image_path', ''),
+            )
+            
+            cursor.execute('''
+                INSERT INTO predictions (
+                    pet_type, disease, confidence, symptoms, 
+                    full_animal_image_path, disease_image_path, detected_image_path
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', insert_data)
+            
+            conn.commit()
+            logger.info(f"Prediction saved to local database with ID: {cursor.lastrowid}")
+            return cursor.lastrowid
+    except sqlite3.Error as e:
+        logger.error(f"Error saving prediction to local database: {e}")
+        return None
 ###############################################################################
 # Run the Proxy Server
 ###############################################################################
