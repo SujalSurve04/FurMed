@@ -1,19 +1,56 @@
-# Flask and API Tools
-Flask==2.2.5
+# ───────────────────────────────────────────────────────────
+# Flask and Extensions
+# ───────────────────────────────────────────────────────────
+Flask==3.0.0
 Flask-Session==0.5.0
-Werkzeug==2.3.7
+Werkzeug==3.0.1
 Jinja2==3.1.5
 click==8.1.8
-requests==2.31.0
-python-dotenv==1.0.1
+python-dotenv==1.0.0
+
+# ───────────────────────────────────────────────────────────
+# Database
+# ───────────────────────────────────────────────────────────
+pymongo==4.6.1
+bson==0.5.10
 dnspython==1.16.0
 
-# Database
-pymongo==4.5.0
-bson==0.5.10
+# ───────────────────────────────────────────────────────────
+# HTTP Requests
+# ───────────────────────────────────────────────────────────
+requests==2.31.0
 
-# Numerical, Data Processing, and Visualization
+# ───────────────────────────────────────────────────────────
+# Mail
+# ───────────────────────────────────────────────────────────
+Flask-Mail==0.9.1
+
+# ───────────────────────────────────────────────────────────
+# Payment Processing
+# ───────────────────────────────────────────────────────────
+paypalrestsdk==1.13.1
+
+# ───────────────────────────────────────────────────────────
+# AI / Machine Learning
+# ───────────────────────────────────────────────────────────
 numpy==1.26.4
+tensorflow==2.17.0          # If you want only Intel build, remove this
+tensorflow-intel==2.17.0    # Or remove this line if you prefer the standard TF
+torch==2.5.1
+torchvision==0.20.1
+ultralytics==8.3.63
+ultralytics-thop==2.0.14
+opencv-python==4.10.0.84
+fsspec==2024.12.0
+
+# ───────────────────────────────────────────────────────────
+# PDF Generation
+# ───────────────────────────────────────────────────────────
+fpdf==1.7.2
+
+# ───────────────────────────────────────────────────────────
+# Additional Numerical/Scientific/Visualization
+# ───────────────────────────────────────────────────────────
 scipy==1.14.1
 matplotlib==3.9.2
 seaborn==0.13.2
@@ -21,35 +58,22 @@ networkx==3.4.2
 sympy==1.13.1
 mpmath==1.3.0
 
-# Machine Learning and AI
-tensorflow==2.17.0
-tensorflow-intel==2.17.0
-torch==2.5.1
-torchvision==0.20.1
-ultralytics==8.3.63
-ultralytics-thop==2.0.14
-fsspec==2024.12.0
+# ───────────────────────────────────────────────────────────
+# Date/Time
+# ───────────────────────────────────────────────────────────
+python-dateutil==2.8.2
+pytz==2023.3.post1
 
-# Image Processing and Computer Vision
-Pillow==10.4.0
-opencv-python==4.10.0.84
-
-# Utility and Performance
-psutil==6.0.0
-py-cpuinfo==9.0.0
-tqdm==4.66.5
-
-# PDF and Text Processing
-fpdf==1.7.2
-pyyaml==6.0.2
-protobuf==4.25.5
-
+# ───────────────────────────────────────────────────────────
 # TensorFlow Optimizations
+# ───────────────────────────────────────────────────────────
 google-pasta==0.2.0
 opt-einsum==3.3.0
 absl-py==2.1.0
 
+# ───────────────────────────────────────────────────────────
 # Console and Formatting Tools
+# ───────────────────────────────────────────────────────────
 termcolor==2.4.0
 markdown-it-py==3.0.0
 pygments==2.18.0
